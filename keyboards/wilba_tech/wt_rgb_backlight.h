@@ -113,3 +113,11 @@ void backlight_color_2_sat_decrease(void);
 
 void backlight_test_led( uint8_t index, bool red, bool green, bool blue );
 void backlight_debug_led(bool state);
+
+
+// ABG:
+void backlight_set_color( int index, uint8_t red, uint8_t green, uint8_t blue );
+void backlight_set_color_all( uint8_t red, uint8_t green, uint8_t blue );
+void backlight_set_key_hit(uint8_t row, uint8_t column);
+
+backlight_config g_config;

@@ -1778,6 +1778,34 @@ void backlight_effect_solid_color(void)
     HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
     RGB rgb = hsv_to_rgb( hsv );
     backlight_set_color_all( rgb.r, rgb.g, rgb.b );
+
+// ABG: start my edit
+    // Relies on hue being 8-bit and wrapping
+    for ( int i=0; i<BACKLIGHT_LED_COUNT; i++ )
+    {
+        // ABG: <<__ controls duration of key press change, left bit shift,
+        //  => multiplying by 2. 
+        uint16_t offset2 = g_key_hit[i]*3/2;
+#if !defined(RGB_BACKLIGHT_HS60) && !defined(RGB_BACKLIGHT_NK65) && !defined(RGB_BACKLIGHT_DAWN60) && !defined(RGB_BACKLIGHT_NEBULA68) && !defined(RGB_BACKLIGHT_NEBULA12) && !defined(RGB_BACKLIGHT_NK87) && !defined(RGB_BACKLIGHT_KW_MEGA)
+        // stabilizer LEDs use spacebar hits
+        if ( i == 36+6 || i == 54+13 || // LC6, LD13
+                ( g_config.use_7u_spacebar && i == 54+14 ) ) // LD14
+        {
+            offset2 = g_key_hit[36+0]*3/2;
+        }
+#endif
+        // ABG:
+        // if offset2 < 63: offset2 = 63-offset2 else offset2 = 0
+        // I.e. here is where the magic happens
+        //  for 63 ticks, move from hue + 63 back down to hue
+        offset2 = (offset2<=63) ? (63-offset2) : 0;
+
+        HSV hsv = { .h = g_config.color_1.h+offset2, .s = 255, .v = g_config.brightness };
+        RGB rgb = hsv_to_rgb( hsv );
+        backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+    }
+// ABG: end my edit
+
 }
 
 // alphas = color1, mods = color2
